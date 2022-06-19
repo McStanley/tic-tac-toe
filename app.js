@@ -7,10 +7,49 @@ const game = (() => {
     const resetActivePlayer = () => {
         activePlayer = player1;
     }
+    const isOver = () => {
+        // get current board state
+        const board = gameBoard.getBoard();
+
+        // check if someone won
+        if (
+            // rows
+            board[0] && board[0] === board [1] && board[0] === board[2] ||
+            board[3] && board[3] === board [4] && board[3] === board[5] ||
+            board[6] && board[6] === board [7] && board[6] === board[8] ||
+
+            // columns
+            board[0] && board[0] === board [3] && board[0] === board[6] ||
+            board[1] && board[1] === board [4] && board[1] === board[7] ||
+            board[2] && board[2] === board [5] && board[2] === board[8] ||
+
+            // diagonals
+            board[0] && board[0] === board [4] && board[0] === board[8] ||
+            board[6] && board[6] === board [4] && board[6] === board[2]
+            ) {
+                displayController.disableGrid();
+
+                const resultOutput = document.querySelector('#result');
+                resultOutput.textContent = `${activePlayer.getName()} won`;
+            }
+
+        // check for a draw
+        let markerCount = 0;
+        for (const i in board) {
+            if (board[i]) markerCount++;
+        }
+        if (markerCount === 9) {
+            displayController.disableGrid();
+
+            const resultOutput = document.querySelector('#result');
+            resultOutput.textContent = `It's a draw`;
+        }
+    }
     return {
         getActivePlayer,
         toggleActivePlayer,
         resetActivePlayer,
+        isOver,
     }
 })();
 
@@ -25,6 +64,7 @@ const gameBoard = (() => {
         const marker = game.getActivePlayer().getMarker();
         board[i] = marker;
         displayController.updateGrid();
+        game.isOver();
         game.toggleActivePlayer();
     };
     return {
@@ -36,9 +76,16 @@ const gameBoard = (() => {
 const displayController = (() => {
     const gridCells = document.querySelectorAll('.grid-cell');
 
-    for (const cell of gridCells) {
-        cell.addEventListener('click', gameBoard.placeMarker);
+    const enableGrid = () => {
+        for (const cell of gridCells) {
+            cell.addEventListener('click', gameBoard.placeMarker);
+        }
     }
+    const disableGrid = () => {
+        for (const cell of gridCells) {
+            cell.removeEventListener('click', gameBoard.placeMarker);
+        }
+    };
     const updateGrid = () => {
         const board = gameBoard.getBoard();
         for (const i in board) {
@@ -46,6 +93,8 @@ const displayController = (() => {
         }
     };
     return {
+        enableGrid,
+        disableGrid,
         updateGrid,
     };
 })();
@@ -66,3 +115,4 @@ const player2 = Player('Player 2', 'X');
 // init
 game.resetActivePlayer();
 displayController.updateGrid();
+displayController.enableGrid();
