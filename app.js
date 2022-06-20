@@ -31,6 +31,8 @@ const game = (() => {
 
                 const resultOutput = document.querySelector('#result');
                 resultOutput.textContent = `${activePlayer.getName()} won`;
+
+                return;
             }
 
         // check for a draw
@@ -43,6 +45,8 @@ const game = (() => {
 
             const resultOutput = document.querySelector('#result');
             resultOutput.textContent = `It's a draw`;
+
+            return;
         }
     }
     return {
