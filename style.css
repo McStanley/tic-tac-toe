@@ -1,16 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
+
 * {
     box-sizing: border-box;
 }
 
 body {
     min-height: 100vh;
-    padding-top: 10px;
+    padding: 20px;
     background-color: #aea0ce;
     background-image: linear-gradient(19deg, #3eecac 0%, #ee74e1 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
-
+    font-family: 'Comfortaa', sans-serif;
+    user-select: none;
 }
 
 h1,
@@ -20,11 +24,13 @@ h2 {
 }
 
 h1 {
-    font-size: 4rem;
+    font-size: 5rem;
+    font-weight: 700;
 }
 
 h2 {
-    font-size: 2rem;
+    font-size: 2.2rem;
+    font-weight: 600;
 }
 
 p {
@@ -61,17 +67,19 @@ p {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
+    font-family: 'Architects Daughter', sans-serif;
+    font-size: 82px;
 }
 
 .grid-cell {
     border: 1px solid black;
     display: grid;
     place-content: center;
-    font-size: 72px;
 }
 
 #output {
-    font-size: 2rem;
+    font-size: 2.5rem;
+    font-weight: 500;
 }
 
 .blur {
@@ -85,6 +93,8 @@ p {
     padding: 20px;
     border-radius: 25px;
     transform: scale(0) translate(-50%, -50%);
+    font-size: 1.2rem;
+    font-weight: 500;
 }
 
 .active {
