@@ -50,17 +50,21 @@ const game = (() => {
         }
     }
     const init = () => {
-        const popups = document.querySelectorAll('.popup');
-        for (const popup of popups) {
-            popup.classList.remove('active');
-        }
-
         gameBoard.resetBoard();
         game.resetActivePlayer();
         displayController.updateOutput('');
         displayController.updateGrid();
-        displayController.disableBlur();
+        displayController.toggleRestart();
+        displayController.updateBlur();
         displayController.enableGrid();
+    }
+    const savePref = () => {
+        const name1 = document.querySelector('#name1').value;
+        const name2 = document.querySelector('#name2').value;
+        player1.setName(name1);
+        player2.setName(name2);
+
+        displayController.toggleMenu();
     }
     return {
         getActivePlayer,
@@ -68,6 +72,7 @@ const game = (() => {
         resetActivePlayer,
         isOver,
         init,
+        savePref,
     }
 })();
 
@@ -119,35 +124,53 @@ const displayController = (() => {
         const output = document.querySelector('#output');
         output.textContent = message;
     }
-    const toggleBlur = () => {
-        grid.classList.toggle('blur');
+    const updateBlur = () => {
+        const menu = document.querySelector('#menu');
+        const restartBtn = document.querySelector('#restart-btn');
+
+        if (
+            menu.classList.contains('active') ||
+            restartBtn.classList.contains('active')
+            ) {
+            grid.classList.add('blur');
+        } else {
+            grid.classList.remove('blur');
+        }
     };
-    const disableBlur = () => {
-        grid.classList.remove('blur');
+    const toggleMenu = () => {
+        const menu = document.querySelector('#menu');
+        menu.classList.toggle('active');
+        updateBlur();
     }
     const toggleRestart = () => {
         const restartBtn = document.querySelector('#restart-btn');
-
-        toggleBlur();
         restartBtn.classList.toggle('active');
+        updateBlur();
     }
     return {
         enableGrid,
         disableGrid,
         updateGrid,
         updateOutput,
-        toggleBlur,
-        disableBlur,
+        updateBlur,
+        toggleMenu,
         toggleRestart,
     };
 })();
 
 const Player = (name, marker) => {
-    const getName = () => name;
-    const getMarker = () => marker;
+    let _name = name;
+    let _marker = marker;
+
+    const getName = () => _name;
+    const getMarker = () => _marker;
+    const setName = (name) => _name = name;
+    const setMarker = (marker) => _marker = marker;
     return {
         getName,
         getMarker,
+        setName,
+        setMarker,
     };
 };
 
@@ -156,6 +179,9 @@ const player1 = Player('Player 1', 'O');
 const player2 = Player('Player 2', 'X');
 
 // add event listeners
+const playBtn = document.querySelector('#play-btn');
+playBtn.addEventListener('click', game.savePref);
+
 const restartBtn = document.querySelector('#restart-btn');
 restartBtn.addEventListener('click', game.init);
 
