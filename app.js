@@ -30,7 +30,8 @@ const game = (() => {
                 displayController.updateOutput(`${activePlayer.getName()} won`);
                 displayController.toggleRestart();
 
-                return;
+                game.toggleActivePlayer();
+                return true;
             }
 
         // check for a draw
@@ -42,8 +43,11 @@ const game = (() => {
             displayController.updateOutput(`It's a draw`);
             displayController.toggleRestart();
 
-            return;
+            game.toggleActivePlayer();
+            return true;
         }
+        game.toggleActivePlayer();
+        return false;
     }
     const init = () => {
         gameBoard.resetBoard();
@@ -53,12 +57,17 @@ const game = (() => {
         displayController.toggleRestart();
         displayController.updateBlur();
     }
+    const initNext = () => {
+        init();
+        displayController.updateOutput(`${game.getActivePlayer().getName()} move`);
+    }
     const savePref = () => {
         const name1 = document.querySelector('#name1').value;
         const name2 = document.querySelector('#name2').value;
         player1.setName(name1 || 'Player 1');
         player2.setName(name2 || 'Player 2');
 
+        displayController.updateOutput(`${game.getActivePlayer().getName()} move`);
         displayController.toggleMenu();
     }
     return {
@@ -67,6 +76,7 @@ const game = (() => {
         resetActivePlayer,
         isOver,
         init,
+        initNext,
         savePref,
     }
 })();
@@ -82,8 +92,9 @@ const gameBoard = (() => {
         const marker = game.getActivePlayer().getMarker();
         board[i] = marker;
         displayController.updateGrid();
-        game.isOver();
-        game.toggleActivePlayer();
+        if (!game.isOver()) {
+            displayController.updateOutput(`${game.getActivePlayer().getName()} move`);
+        }
     };
     const resetBoard = () => {
         board = [];
@@ -178,7 +189,7 @@ const playBtn = document.querySelector('#play-btn');
 playBtn.addEventListener('click', game.savePref);
 
 const restartBtn = document.querySelector('#restart-btn');
-restartBtn.addEventListener('click', game.init);
+restartBtn.addEventListener('click', game.initNext);
 
 // init
 game.init();
