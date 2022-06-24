@@ -27,8 +27,6 @@ const game = (() => {
             board[0] && board[0] === board [4] && board[0] === board[8] ||
             board[6] && board[6] === board [4] && board[6] === board[2]
             ) {
-                displayController.disableGrid();
-
                 displayController.updateOutput(`${activePlayer.getName()} won`);
                 displayController.toggleRestart();
 
@@ -41,8 +39,6 @@ const game = (() => {
             if (board[i]) markerCount++;
         }
         if (markerCount === 9) {
-            displayController.disableGrid();
-
             displayController.updateOutput(`It's a draw`);
             displayController.toggleRestart();
 
@@ -56,7 +52,6 @@ const game = (() => {
         displayController.updateGrid();
         displayController.toggleRestart();
         displayController.updateBlur();
-        displayController.enableGrid();
     }
     const savePref = () => {
         const name1 = document.querySelector('#name1').value;
@@ -133,8 +128,10 @@ const displayController = (() => {
             restartBtn.classList.contains('active')
             ) {
             grid.classList.add('blur');
+            disableGrid();
         } else {
             grid.classList.remove('blur');
+            enableGrid();
         }
     };
     const toggleMenu = () => {
@@ -148,8 +145,6 @@ const displayController = (() => {
         updateBlur();
     }
     return {
-        enableGrid,
-        disableGrid,
         updateGrid,
         updateOutput,
         updateBlur,
