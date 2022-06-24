@@ -61,8 +61,8 @@ const game = (() => {
     const savePref = () => {
         const name1 = document.querySelector('#name1').value;
         const name2 = document.querySelector('#name2').value;
-        player1.setName(name1);
-        player2.setName(name2);
+        player1.setName(name1 || 'Player 1');
+        player2.setName(name2 || 'Player 2');
 
         displayController.toggleMenu();
     }
