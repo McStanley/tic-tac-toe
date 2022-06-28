@@ -128,3 +128,20 @@ img {
     font-size: 2rem;
     font-weight: bold;
 }
+
+.mode-selection {
+    display: flex;
+    gap: 20px;
+}
+
+.radio-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    color: rgb(36, 36, 36);
+}
+
+.radio-container > label {
+    font-size: 1rem;
+}

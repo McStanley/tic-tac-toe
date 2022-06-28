@@ -1,4 +1,5 @@
 const game = (() => {
+    let mode = null;
     let activePlayer = null;
     const getActivePlayer = () => activePlayer;
     const toggleActivePlayer = () => {
@@ -6,6 +7,35 @@ const game = (() => {
     };
     const resetActivePlayer = () => {
         activePlayer = player1;
+    }
+    const playerMove = (e) => {
+        // check if the cell is empty
+        const board = gameBoard.getBoard();
+        const i = e.target.dataset.index;
+        if (board[i]) return;
+
+        gameBoard.placeMarker(i);
+
+        if (!game.isOver()) {
+            if (mode === 'easy') {
+                easyMove();
+                isOver();
+            }
+            if (mode === 'impossible') {
+                impossibleMove();
+                isOver();
+            }
+        }
+    }
+    const easyMove = () => {
+        const board = gameBoard.getBoard();
+
+        let i;
+        do {
+            // random index from 0 to 9
+            i = Math.floor(Math.random() * 9);
+        } while (board[i]);
+        gameBoard.placeMarker(i);
     }
     const isOver = () => {
         // get current board state
@@ -47,6 +77,7 @@ const game = (() => {
             return true;
         }
         game.toggleActivePlayer();
+        displayController.updateOutput(`${game.getActivePlayer().getName()} move`);
         return false;
     }
     const init = () => {
@@ -67,6 +98,13 @@ const game = (() => {
         player1.setName(name1 || 'Player 1');
         player2.setName(name2 || 'Player 2');
 
+        const radioModes = document.querySelectorAll('input[name=mode]');
+        for (const i in radioModes) {
+            if (radioModes[i].checked) {
+                mode = radioModes[i].value;
+            }
+        }
+
         displayController.updateOutput(`${game.getActivePlayer().getName()} move`);
         displayController.toggleMenu();
     }
@@ -74,6 +112,7 @@ const game = (() => {
         getActivePlayer,
         toggleActivePlayer,
         resetActivePlayer,
+        playerMove,
         isOver,
         init,
         initNext,
@@ -84,17 +123,10 @@ const game = (() => {
 const gameBoard = (() => {
     let board = [];
     const getBoard = () => board;
-    const placeMarker = (e) => {
-        // check if the cell is empty
-        const i = e.target.dataset.index;
-        if (board[i]) return;
-
+    const placeMarker = (i) => {
         const marker = game.getActivePlayer().getMarker();
         board[i] = marker;
         displayController.updateGrid();
-        if (!game.isOver()) {
-            displayController.updateOutput(`${game.getActivePlayer().getName()} move`);
-        }
     };
     const resetBoard = () => {
         board = [];
@@ -112,12 +144,12 @@ const displayController = (() => {
 
     const enableGrid = () => {
         for (const cell of gridCells) {
-            cell.addEventListener('click', gameBoard.placeMarker);
+            cell.addEventListener('click', game.playerMove);
         }
     }
     const disableGrid = () => {
         for (const cell of gridCells) {
-            cell.removeEventListener('click', gameBoard.placeMarker);
+            cell.removeEventListener('click', game.playerMove);
         }
     };
     const updateGrid = () => {
