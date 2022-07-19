@@ -7,7 +7,7 @@ const game = (() => {
     };
     const resetActivePlayer = () => {
         activePlayer = player1;
-    }
+    };
     const playerMove = (e) => {
         // check if the cell is empty
         const board = gameBoard.getBoard();
@@ -16,17 +16,8 @@ const game = (() => {
 
         gameBoard.placeMarker(i);
 
-        if (!game.isOver()) {
-            if (mode === 'easy') {
-                easyMove();
-                isOver();
-            }
-            if (mode === 'impossible') {
-                impossibleMove();
-                isOver();
-            }
-        }
-    }
+        if (mode === 'easy' && !game.checkWinner(false)) easyMove();
+    };
     const easyMove = () => {
         const board = gameBoard.getBoard();
 
@@ -35,34 +26,25 @@ const game = (() => {
             // random index from 0 to 9
             i = Math.floor(Math.random() * 9);
         } while (board[i]);
+
         gameBoard.placeMarker(i);
-    }
-    const isOver = () => {
+    };
+    const checkWinner = (displayOutcome) => {
         // get current board state
         const board = gameBoard.getBoard();
 
-        // check if someone won
-        if (
-            // rows
-            board[0] && board[0] === board [1] && board[0] === board[2] ||
-            board[3] && board[3] === board [4] && board[3] === board[5] ||
-            board[6] && board[6] === board [7] && board[6] === board[8] ||
+        const winCombos = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6],
+        ];
 
-            // columns
-            board[0] && board[0] === board [3] && board[0] === board[6] ||
-            board[1] && board[1] === board [4] && board[1] === board[7] ||
-            board[2] && board[2] === board [5] && board[2] === board[8] ||
-
-            // diagonals
-            board[0] && board[0] === board [4] && board[0] === board[8] ||
-            board[6] && board[6] === board [4] && board[6] === board[2]
-            ) {
-                displayController.updateOutput(`${activePlayer.getName()} won`);
-                displayController.toggleRestart();
-
-                game.toggleActivePlayer();
-                return true;
-            }
+        let outcome = false;
 
         // check for a draw
         let markerCount = 0;
@@ -70,16 +52,25 @@ const game = (() => {
             if (board[i]) markerCount++;
         }
         if (markerCount === 9) {
-            displayController.updateOutput(`It's a draw`);
-            displayController.toggleRestart();
-
-            game.toggleActivePlayer();
-            return true;
+            outcome = 'draw';
         }
-        game.toggleActivePlayer();
-        displayController.updateOutput(`${game.getActivePlayer().getName()} move`);
-        return false;
-    }
+        // check if someone won
+        for (const combo of winCombos) {
+            const a = combo[0];
+            const b = combo[1];
+            const c = combo[2];
+            if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                outcome = board[a];
+            }
+        }
+        // display game outcome if displayOutcome parameter is true
+        if (outcome && displayOutcome) {
+            displayController.displayResult(outcome);
+            displayController.toggleRestart();
+        }
+
+        return outcome;
+    };
     const init = () => {
         gameBoard.resetBoard();
         game.resetActivePlayer();
@@ -87,11 +78,11 @@ const game = (() => {
         displayController.updateGrid();
         displayController.toggleRestart();
         displayController.updateBlur();
-    }
+    };
     const initNext = () => {
         init();
         displayController.updateOutput(`${game.getActivePlayer().getName()} move`);
-    }
+    };
     const savePref = () => {
         const name1 = document.querySelector('#name1').value;
         const name2 = document.querySelector('#name2').value;
@@ -107,29 +98,34 @@ const game = (() => {
 
         displayController.updateOutput(`${game.getActivePlayer().getName()} move`);
         displayController.toggleMenu();
-    }
+    };
     return {
         getActivePlayer,
         toggleActivePlayer,
         resetActivePlayer,
         playerMove,
-        isOver,
+        checkWinner,
         init,
         initNext,
         savePref,
-    }
+    };
 })();
 
 const gameBoard = (() => {
-    let board = [];
+    let board = Array(9).fill(null);
     const getBoard = () => board;
     const placeMarker = (i) => {
         const marker = game.getActivePlayer().getMarker();
         board[i] = marker;
         displayController.updateGrid();
+        // stop if game over
+        if (game.checkWinner(true)) return;
+        // otherwise toggle active player and update output
+        game.toggleActivePlayer();
+        displayController.updateOutput(`${game.getActivePlayer().getName()} move`);
     };
     const resetBoard = () => {
-        board = [];
+        board = Array(9).fill(null);
     };
     return {
         getBoard,
@@ -146,7 +142,7 @@ const displayController = (() => {
         for (const cell of gridCells) {
             cell.addEventListener('click', game.playerMove);
         }
-    }
+    };
     const disableGrid = () => {
         for (const cell of gridCells) {
             cell.removeEventListener('click', game.playerMove);
@@ -161,7 +157,16 @@ const displayController = (() => {
     const updateOutput = (message) => {
         const output = document.querySelector('#output');
         output.textContent = message;
-    }
+    };
+    const displayResult = (result) => {
+        if (result === 'O' || result === 'X') {
+            const winner = result === player1.getMarker() ? player1.getName() : player2.getName();
+            updateOutput(`${winner} won`);
+        }
+        if (result === 'draw') {
+            updateOutput(`It's a draw`);
+        }
+    };
     const updateBlur = () => {
         const menu = document.querySelector('#menu');
         const restartBtn = document.querySelector('#restart-btn');
@@ -181,15 +186,16 @@ const displayController = (() => {
         const menu = document.querySelector('#menu');
         menu.classList.toggle('active');
         updateBlur();
-    }
+    };
     const toggleRestart = () => {
         const restartBtn = document.querySelector('#restart-btn');
         restartBtn.classList.toggle('active');
         updateBlur();
-    }
+    };
     return {
         updateGrid,
         updateOutput,
+        displayResult,
         updateBlur,
         toggleMenu,
         toggleRestart,
