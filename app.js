@@ -16,9 +16,12 @@ const game = (() => {
 
         gameBoard.placeMarker(i);
 
-        if (mode === 'easy' && !game.checkWinner(false)) easyMove();
+        // check if game is over
+        if (checkWinner(false)) return;
+        if (mode === 'easy') randomMove();
+        if (mode === 'impossible') bestMove();
     };
-    const easyMove = () => {
+    const randomMove = () => {
         const board = gameBoard.getBoard();
 
         let i;
@@ -28,6 +31,73 @@ const game = (() => {
         } while (board[i]);
 
         gameBoard.placeMarker(i);
+    };
+    const bestMove = () => {
+        const board = gameBoard.getBoard();
+        const marker = game.getActivePlayer().getMarker();
+        let bestScore = -Infinity;
+        let move;
+
+        // find empty cells
+        for (const i in board) {
+            if (!board[i]) {
+                // temporarily put marker in the cell
+                board[i] = marker;
+                let score = minimax(board, 0, false);
+                // delete marker after checking it
+                board[i] = null;
+                if (score > bestScore) {
+                    bestScore = score;
+                    move = i;
+                }
+            }
+        }
+        gameBoard.placeMarker(move);
+    };
+    const minimax = (board, depth, isMaximizing) => {
+        let result = checkWinner(false);
+        // check if game is over
+        if (result) {
+            const marker = getActivePlayer().getMarker();
+            // active player wins
+            if (result === marker) return 1;
+            // game ends in a draw
+            if (result === 'draw') return 0;
+            // active player lose
+            return -1;
+        }
+
+        // maximizing
+        if (isMaximizing) {
+            let bestScore = -Infinity;
+            const marker = game.getActivePlayer().getMarker();
+            // find empty cells
+            for (const i in board) {
+                if (!board[i]) {
+                    board[i] = marker;
+                    let score = minimax(board, depth + 1, false);
+                    // delete marker after checking it
+                    board[i] = null;
+                    bestScore = Math.max(score, bestScore);
+                }
+            }
+            return bestScore;
+        }
+
+        // minimizing
+        let bestScore = Infinity;
+        const marker = game.getActivePlayer().getMarker() === 'O' ? 'X' : 'O';
+        // find empty cells
+        for (const i in board) {
+            if (!board[i]) {
+                board[i] = marker;
+                let score = minimax(board, depth + 1, true);
+                // delete marker after checking it
+                board[i] = null;
+                bestScore = Math.min(score, bestScore);
+            }
+        }
+        return bestScore;
     };
     const checkWinner = (displayOutcome) => {
         // get current board state
