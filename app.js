@@ -60,11 +60,11 @@ const game = (() => {
         if (result) {
             const marker = getActivePlayer().getMarker();
             // active player wins
-            if (result === marker) return 1;
+            if (result === marker) return 100 - depth;
             // game ends in a draw
             if (result === 'draw') return 0;
             // active player lose
-            return -1;
+            return -100 + depth;
         }
 
         // maximizing
